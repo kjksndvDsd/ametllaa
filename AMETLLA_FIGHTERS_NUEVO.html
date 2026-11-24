@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AMETLLA FIGHTERS</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--red:#ff4545;--blue:#398cff;--bg:#0d1019;--panel:#171d2b;--line:#303b52;--gold:#ffd45a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#202b43,#0b0e16 65%);color:#fff;font-family:Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{border:0;border-radius:10px;padding:11px 15px;font-weight:800;color:white;background:#34435d;cursor:pointer}button:disabled{opacity:.35;cursor:not-allowed}
+.primary{background:#2877ed}.green{background:#18a65b}.danger{background:#c83a45}.gold{background:#9a7620}.wrap{max-width:1100px;margin:auto;padding:18px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}h1{margin:0;font-size:clamp(25px,5vw,42px);letter-spacing:1px}h1 span{color:var(--red)}.sub{color:#aab6cc;font-size:13px}
+.panel{background:#151c2a;border:1px solid var(--line);border-radius:16px;padding:17px;margin:12px 0;box-shadow:0 10px 30px #0004}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.field{background:#0d1421;border:1px solid #3a4962;border-radius:9px;color:white;padding:11px;min-width:0;width:100%}
+label{display:block;color:#b7c3d8;font-size:13px;margin:8px 0 5px}.hidden{display:none!important}.muted{color:#9eabc0}.small{font-size:12px}.teams{display:grid;grid-template-columns:1fr 1fr;gap:12px}.team{border-radius:12px;padding:12px;background:#0d1421;border:1px solid var(--line);min-height:110px}.team.redteam{border-color:#a83e4a}.team.blueteam{border-color:#3679c8}.team h3{margin:0 0 9px}.player{display:flex;justify-content:space-between;align-items:center;gap:7px;background:#202a3c;padding:8px;border-radius:8px;margin:5px 0;font-size:13px}.player button{padding:5px 9px}.avatar{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:50%;background:#34435d;margin-right:7px;font-size:18px}
+#game{width:100%;height:auto;display:block;background:linear-gradient(#162239,#273954 72%,#26303e 72%);border:2px solid #40516b;border-radius:14px;touch-action:none}
+.scoreline{display:flex;justify-content:center;gap:22px;font-weight:900;font-size:20px;margin:8px}.redtxt{color:#ff6666}.bluetxt{color:#69aaff}
+#status{text-align:center;color:#c6d2e5;margin:8px;font-weight:bold;min-height:20px}.mobilecontrols{display:flex;justify-content:space-between;gap:8px;margin-top:10px;user-select:none}.mobilecontrols button{min-width:58px;min-height:54px;font-size:19px;touch-action:none}.mobilecontrols .move{background:#35445f}.mobilecontrols .hit{background:#a83c48}.mobilecontrols .jump{background:#2877ed}
+.avatargrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:8px}.avatargrid label{background:#0d1421;border:1px solid var(--line);padding:8px;border-radius:9px}.avatargrid select{width:100%;margin-top:5px}
+.note{background:#332b16;border:1px solid #76602b;padding:10px;border-radius:10px;color:#f5dfa0;font-size:13px;line-height:1.4}
+@media(max-width:650px){.teams{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}.wrap{padding:10px}.panel{padding:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><h1>AMETLLA <span>FIGHTERS</span></h1><div class="sub">JUEGA CON TU EQUIPO · LUCHA HASTA 7 RONDAS</div></div><div id="connection" class="sub">Desconectado</div></header>
+
+<section id="home">
+ <div class="panel">
+  <h2>Tu jugador</h2>
+  <div class="row"><div><label>Nombre (solo se puede cambiar en el lobby)</label><input id="name" class="field" maxlength="16" value="Jugador"></div><div><label>Formato de combate</label><select id="format" class="field"><option value="1">1 vs 1</option><option value="2">2 vs 2</option><option value="3">3 vs 3</option><option value="4">4 vs 4</option></select></div></div>
+  <h3>Personaliza tu avatar</h3>
+  <div class="avatargrid">
+   <label>Cuerpo<select id="body"><option>🧍</option><option>🥷</option><option>🤖</option><option>🧟</option><option>🦸</option><option>🐼</option><option>👽</option><option>🧑‍🚀</option></select></label>
+   <label>Accesorio<select id="accessory"><option>Sin accesorio</option><option>🧢 Gorra</option><option>👑 Corona</option><option>🎧 Auriculares</option><option>🥽 Gafas</option><option>🎩 Sombrero</option><option>🦊 Máscara</option></select></label>
+   <label>Color<select id="color"><option value="#ff5555">Rojo</option><option value="#398cff">Azul</option><option value="#28b879">Verde</option><option value="#a76bff">Morado</option><option value="#f1b934">Dorado</option><option value="#eeeeee">Blanco</option></select></label>
+   <label>Estilo<select id="style"><option>Normal</option><option>⚡ Eléctrico</option><option>🔥 Fuego</option><option>❄️ Hielo</option><option>🌟 Estrella</option></select></label>
+  </div>
+ </div>
+ <div class="panel">
+  <h2>Jugar online</h2>
+  <div class="row"><button class="green" id="create">Crear sala</button><div><label>Código de sala</label><input id="roomcode" class="field" maxlength="6" placeholder="Ej. A7K2QX" style="text-transform:uppercase"></div><button class="primary" id="join">Unirse a sala</button></div>
+  <p class="small muted">El creador será el líder y podrá expulsar jugadores e iniciar la partida. Para unirse, tus amigos necesitan el código y el ID del líder.</p>
+ </div>
+ <div id="rejoin" class="panel hidden"><h3>¿Vale valiente, quieres unirte otra vez al combate?</h3><div class="row"><button class="danger" id="noRejoin">NO</button><button class="primary" id="yesRejoin">SÍ</button></div></div>
+</section>
+
+<section id="lobby" class="hidden">
+ <div class="panel">
+  <div class="row"><div><h2 style="margin:0">Lobby</h2><div class="muted small">Código: <b id="showcode"></b> · ID del líder: <b id="hostid"></b></div></div><button id="copycode">Copiar código</button><button id="leave" class="danger">Salir de la sala</button></div>
+  <div class="teams" style="margin-top:14px">
+   <div class="team redteam"><h3 class="redtxt">EQUIPO ROJO</h3><div id="redplayers"></div></div>
+   <div class="team blueteam"><h3 class="bluetxt">EQUIPO AZUL</h3><div id="blueplayers"></div></div>
+  </div>
+  <div class="row" style="margin-top:14px"><button id="ready" class="primary">LISTO</button><button id="start" class="green hidden" disabled>INICIAR PARTIDA</button></div>
+  <div id="lobbystatus" class="small muted" style="margin-top:10px">Esperando jugadores...</div>
+ </div>
+</section>
+
+<section id="battle" class="hidden">
+ <div class="scoreline"><span class="redtxt">ROJO <b id="redscore">0</b></span><span>RONDA <b id="round">1</b>/7</span><span class="bluetxt">AZUL <b id="bluescore">0</b></span></div>
+ <div id="status">¡A luchar!</div>
+ <canvas id="game" width="960" height="500"></canvas>
+ <div class="mobilecontrols">
+  <div class="row" style="flex:1"><button class="move" data-act="left">◀</button><button class="move" data-act="right">▶</button></div>
+  <div class="row" style="flex:1"><button class="jump" data-act="jump">SALTAR</button><button class="hit" data-act="punch">PUÑO</button><button class="hit" data-act="kick">PATADA</button></div>
+ </div>
+ <div class="small muted" style="text-align:center;margin-top:8px">PC: A/D mover · ESPACIO saltar · ENTER puño · RETROCESO patada</div>
+</section>
+<div class="note" style="margin-top:14px">Importante: el juego usa PeerJS para conectar los navegadores. Necesitáis internet y que la red no bloquee las conexiones WebRTC. GitHub Pages solo aloja el archivo; no es el servidor de combate.</div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const state={peer:null,host:false,hostId:null,room:null,conn:null,conns:{},players:{},me:null,started:false,round:1,redWins:0,blueWins:0,roundOver:false,gameOver:false,roundTimer:null,keys:{},lastSend:0,world:null,reconnect:null};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const getAvatar=()=>({body:$('body').value,accessory:$('accessory').value,color:$('color').value,style:$('style').value});
+const myName=()=>($('name').value.trim().slice(0,16)||'Jugador');
+const show=(id)=>$(id).classList.remove('hidden'),hide=(id)=>$(id).classList.add('hidden');
+const setConn=t=>$('connection').textContent=t;
+const accessoryText=a=>a==='Sin accesorio'?'':a.split(' ')[0];
+function enterLobby(){hide('home');show('lobby');hide('battle');$('showcode').textContent=state.room;$('hostid').textContent=state.hostId||state.peer?.id||'conectando';renderLobby()}
+function showHome(){show('home');hide('lobby');hide('battle')}
+function sendHost(msg){if(state.host){handleHostMessage(state.me,msg)}else if(state.conn&&state.conn.open)state.conn.send(msg)}
+function broadcast(msg,except){Object.values(state.conns).forEach(c=>{if(c.open&&c.peer!==except)c.send(msg)})}
+function snapshot(){return {players:state.players,started:state.started,round:state.round,redWins:state.redWins,blueWins:state.blueWins,roundOver:state.roundOver,gameOver:state.gameOver,room:state.room,hostId:state.peer?.id}}
+function updateAll(){const s={type:'state',data:snapshot()};broadcast(s);renderLobby();if(state.started)draw()}
+function connectPeer(onopen){state.peer=new Peer();state.peer.on('open',id=>{setConn('Conectado · '+id.slice(0,7));onopen&&onopen(id)});state.peer.on('connection',c=>{c.on('data',m=>{if(state.host)handleHostMessage(c.peer,m)});c.on('close',()=>{if(state.host)disconnectPlayer(c.peer)});state.conns[c.peer]=c});state.peer.on('error',e=>{setConn('Error de conexión: '+e.type);alert('No se pudo conectar: '+e.type+'. Comprueba internet o prueba otra red.')})}
+function createRoom(){if(state.peer)return;state.host=true;state.room=Math.random().toString(36).slice(2,8).toUpperCase();state.me=uid();connectPeer(id=>{state.hostId=id;const p=makePlayer(state.me,id);p.host=true;state.players[state.me]=p;localStorage.setItem('af_rejoin',JSON.stringify({room:state.room,hostId:id,token:state.me,team:p.team}));enterLobby();updateAll()})}
+function makePlayer(token,peerId){const counts={red:0,blue:0};Object.values(state.players).forEach(p=>{if(p.connected!==false)counts[p.team]++});const max=Number($('format').value);let team=counts.red<=counts.blue?'red':'blue';if(counts[team]>=max)team=team==='red'?'blue':'red';return {token,peerId,name:myName(),avatar:getAvatar(),team,ready:false,connected:true,x:team==='red'?210:750,y:365,hp:200,alive:true,dir:team==='red'?1:-1,attack:0,vy:0}}
+function joinRoom(code,token){if(state.peer)return;state.host=false;state.room=code;state.me=token||uid();connectPeer(id=>{state.conn=state.peer.connect(state.hostId,{reliable:true});state.conn.on('open',()=>{localStorage.setItem('af_rejoin',JSON.stringify({room:state.room,hostId:state.hostId,token:state.me}));state.conn.send({type:'join',token:state.me,name:myName(),avatar:getAvatar()});enterLobby();setConn('Conectado a sala '+code)});state.conn.on('data',m=>handleClientMessage(m));state.conn.on('close',()=>{setConn('Conexión perdida');offerReconnect()})})}
+function handleHostMessage(from,m){if(!m)return;
+ if(m.type==='join'){let p=state.players[m.token];if(p&&p.rejoinUntil>Date.now()){p.connected=true;p.peerId=from;p.name=m.name||p.name;p.avatar=m.avatar||p.avatar;p.rejoinUntil=null;p.hp=Math.max(1,p.hp);p.alive=true;state.conns[from]=findConn(from);broadcast({type:'rejoined',token:m.token});}
+ else {const max=Number(state.maxPlayers||$('format').value)*2;if(state.started||Object.values(state.players).filter(x=>x.connected).length>=max){const c=findConn(from);c&&c.send({type:'error',text:'La sala está llena o la partida ya empezó'});return}const token=m.token||uid();p=makePlayer(token,from);p.peerId=from;p.name=m.name||'Jugador';p.avatar=m.avatar||p.avatar;state.players[token]=p;state.conns[from]=findConn(from);p.token=token}
+ broadcast({type:'joined',token:m.token});updateAll();sendTo(from,{type:'state',data:snapshot()});}
+ if(m.type==='ready'){const p=playerByPeer(from);if(p){p.ready=!!m.value;updateAll()}}
+ if(m.type==='kick'){const p=state.players[m.token];if(p&&state.players[state.me]?.host&&p.token!==state.me){sendTo(p.peerId,{type:'kicked'});delete state.players[m.token];updateAll()}}
+ if(m.type==='start'&&state.players[state.me]?.host)startGame();
+ if(m.type==='input'){const p=playerByPeer(from);if(p&&state.started&&!state.roundOver&&!state.gameOver){p.input=m.input}}
+ if(m.type==='leave'){disconnectPlayer(from)}
+ if(m.type==='rejoin'){const p=state.players[m.token];if(p&&p.rejoinUntil>Date.now()){p.peerId=from;p.connected=true;p.rejoinUntil=null;p.alive=true;state.conns[from]=findConn(from);sendTo(from,{type:'state',data:snapshot()});updateAll()}}
+}
+function findConn(peer){return state.conns[peer]||null}function sendTo(peer,m){const c=findConn(peer);if(c&&c.open)c.send(m)}
+function playerByPeer(peer){return Object.values(state.players).find(p=>p.peerId===peer)}
+function disconnectPlayer(peer){const p=playerByPeer(peer);if(!p)return;p.connected=false;p.ready=false;p.rejoinUntil=Date.now()+90000;if(state.started){p.alive=false;p.hp=0}updateAll();setTimeout(()=>{if(state.players[p.token]===p&&!p.connected&&Date.now()>p.rejoinUntil){delete state.players[p.token];updateAll()}},91000)}
+function handleClientMessage(m){if(m.type==='state'){Object.assign(state,m.data);state.players=m.data.players;renderLobby();if(state.started){show('battle');hide('lobby');draw();$('round').textContent=state.round;$('redscore').textContent=state.redWins;$('bluescore').textContent=state.blueWins}if(state.gameOver){$('status').textContent='¡PARTIDA TERMINADA!';show('lobby');hide('battle')}}if(m.type==='error')alert(m.text);if(m.type==='kicked'){alert('El líder te ha expulsado de la sala');cleanup();showHome()}if(m.type==='roundText')$('status').textContent=m.text;if(m.type==='rejoined')$('status').textContent='¡Has vuelto al combate!'}
+function renderLobby(){const ps=Object.values(state.players||{});['red','blue'].forEach(team=>{const root=$(team+'players');root.innerHTML='';ps.filter(p=>p.team===team).forEach(p=>{const d=document.createElement('div');d.className='player';const left=document.createElement('span');left.textContent=(p.avatar?.body||'🧍')+' '+p.name+(p.connected===false?' (desconectado)':'')+(p.ready?' ✓':'');d.appendChild(left);if(state.players[state.me]?.host&&p.token!==state.me){const b=document.createElement('button');b.textContent='✕';b.className='danger';b.title='Expulsar';b.onclick=()=>{if(confirm('¿Expulsar a '+p.name+'?')){if(state.host){sendTo(p.peerId,{type:'kicked'});delete state.players[p.token];updateAll()}else sendHost({type:'kick',token:p.token})}};d.appendChild(b)}root.appendChild(d)})});const max=(state.maxPlayers||$('format').value)*2;const connected=ps.filter(p=>p.connected!==false);$('lobbystatus').textContent=connected.length+'/'+max+' jugadores · '+connected.filter(p=>p.ready).length+' listos';if(state.host){show('start');hide('ready');$('start').disabled=connected.length!==max||!connected.every(p=>p.ready)||state.started}else{show('ready');hide('start');$('ready').textContent=state.players[state.me]?.ready?'NO ESTOY LISTO':'LISTO'}}
+function startGame(){const ps=Object.values(state.players).filter(p=>p.connected!==false);const max=Number(state.maxPlayers||$('format').value);if(ps.length!==max*2||!ps.every(p=>p.ready))return;state.started=true;state.round=1;state.redWins=0;state.blueWins=0;state.gameOver=false;resetRound();broadcast({type:'state',data:snapshot()});show('battle');hide('lobby');$('status').textContent='¡LUCHAD!';updateAll();gameLoop()}
+function resetRound(){state.roundOver=false;Object.values(state.players).forEach(p=>{p.hp=200;p.alive=p.connected!==false;p.x=p.team==='red'?180+Math.random()*90:690+Math.random()*90;p.y=365;p.vy=0;p.dir=p.team==='red'?1:-1;p.attack=0;p.input={}})}
+function gameLoop(){if(!state.host||!state.started)return;const now=Date.now();Object.values(state.players).forEach(p=>{if(!p.connected||!p.alive)return;const i=p.input||{};if(!state.roundOver){if(i.left)p.x-=4;if(i.right)p.x+=4;p.x=Math.max(25,Math.min(935,p.x));if(i.jump&&p.y>=365)p.vy=-12;p.vy+=.55;p.y=Math.min(365,p.y+p.vy);if(p.y>=365)p.vy=0;if(p.attack>0)p.attack--;if(i.punch||i.kick){if(!p.attack){p.attack=12;const damage=10;const range=i.kick?95:70;const enemy=Object.values(state.players).find(q=>q.connected&&q.alive&&q.team!==p.team&&Math.abs(q.x-p.x)<range&&Math.abs(q.y-p.y)<65&&(q.x-p.x)*p.dir>0);if(enemy){enemy.hp=Math.max(0,enemy.hp-damage);if(enemy.hp===0)enemy.alive=false}}}p.input={}}});
+const aliveRed=Object.values(state.players).filter(p=>p.team==='red'&&p.connected&&p.alive).length,aliveBlue=Object.values(state.players).filter(p=>p.team==='blue'&&p.connected&&p.alive).length;
+if(!state.roundOver&&(aliveRed===0||aliveBlue===0)){state.roundOver=true;if(aliveRed===0&&aliveBlue===0){}else if(aliveRed===0)state.blueWins++;else state.redWins++;broadcast({type:'roundText',text:aliveRed===0&&aliveBlue===0?'EMPATE':aliveRed===0?'¡EQUIPO AZUL WIN!':'¡EQUIPO ROJO WIN!'});updateAll();let count=3;$('status').textContent='Siguiente ronda en '+count;const timer=setInterval(()=>{count--;if(count>0){$('status').textContent='Siguiente ronda en '+count;broadcast({type:'roundText',text:'Siguiente ronda en '+count})}else{clearInterval(timer);if(state.redWins>=4||state.blueWins>=4||state.round>=7){state.gameOver=true;state.started=false;$('status').textContent=state.redWins>state.blueWins?'¡EQUIPO ROJO GANA LA PARTIDA!':state.blueWins>state.redWins?'¡EQUIPO AZUL GANA LA PARTIDA!':'¡EMPATE!';broadcast({type:'state',data:snapshot()});updateAll();show('lobby');hide('battle')}else{state.round++;resetRound();broadcast({type:'roundText',text:'¡RONDA '+state.round+'!'});updateAll()}}},1000)}
+broadcast({type:'state',data:snapshot()});draw();requestAnimationFrame(gameLoop)}
+function draw(){const c=$('game'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#1b2a42';ctx.fillRect(0,0,960,500);ctx.fillStyle='#34445a';ctx.fillRect(0,410,960,90);ctx.strokeStyle='#64758d';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,410);ctx.lineTo(960,410);ctx.stroke();
+const ps=Object.values(state.players||{});ps.forEach(p=>{if(p.connected===false)return;const x=p.x||200,y=p.y||365;ctx.fillStyle='#070b12';ctx.fillRect(x-34,y-72,68,8);ctx.fillStyle=p.team==='red'?'#ff4c55':'#398cff';ctx.fillRect(x-34,y-72,68*Math.max(0,p.hp/200),8);ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText(p.name,x,y-80);ctx.fillStyle=p.avatar?.color|| (p.team==='red'?'#ff5555':'#398cff');ctx.beginPath();ctx.arc(x,y-43,18,0,Math.PI*2);ctx.fill();ctx.font='25px Arial';ctx.fillText(p.avatar?.body||'🧍',x,y-35);ctx.font='17px Arial';ctx.fillText(accessoryText(p.avatar?.accessory),x+17,y-59);ctx.fillStyle='#fff';ctx.fillRect(x-10,y-25,20,32);ctx.fillStyle=p.avatar?.color||'#fff';ctx.fillRect(x-17,y+4,13,28);ctx.fillRect(x+4,y+4,13,28);ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,y-18);ctx.lineTo(x+(p.attack? (p.dir||1)*36:0),y-8);ctx.stroke();if(p.attack){ctx.strokeStyle='#ffd45a';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x,y+1);ctx.lineTo(x+(p.dir||1)*40,y+13);ctx.stroke()}})}
+function inputSend(){if(!state.started||state.roundOver)return;const inp={left:!!state.keys.left,right:!!state.keys.right,jump:!!state.keys.jump,punch:!!state.keys.punch,kick:!!state.keys.kick};if(state.host){const p=state.players[state.me];if(p)p.input=inp}else sendHost({type:'input',input:inp});state.keys.punch=false;state.keys.kick=false}
+function setAction(a,v){state.keys[a]=v;inputSend()}
+window.addEventListener('keydown',e=>{if(['Space','Backspace','Enter','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.repeat&&['Enter','Backspace','Space'].includes(e.code))return;const map={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',Space:'jump',Enter:'punch',Backspace:'kick'};if(map[e.code])setAction(map[e.code],true)});
+window.addEventListener('keyup',e=>{const map={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',Space:'jump'};if(map[e.code])setAction(map[e.code],false)});
+document.querySelectorAll('[data-act]').forEach(b=>{const a=b.dataset.act;b.addEventListener('pointerdown',e=>{e.preventDefault();setAction(a,true)});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>setAction(a,false)))});
+$('create').onclick=()=>{state.maxPlayers=Number($('format').value);createRoom()};
+$('join').onclick=()=>{const code=$('roomcode').value.trim().toUpperCase();if(code.length!==6)return alert('Escribe un código de 6 letras/números.');const host=prompt('Pega el ID del líder que aparece en el lobby del creador:');if(!host)return;state.hostId=host.trim();state.maxPlayers=Number($('format').value);joinRoom(code)};
+$('ready').onclick=()=>{const p=state.players[state.me];if(!p)return;p.ready=!p.ready;if(state.host)updateAll();else sendHost({type:'ready',value:p.ready});renderLobby()};
+$('start').onclick=()=>startGame();
+$('leave').onclick=()=>{sendHost({type:'leave'});cleanup();showHome()};
+$('copycode').onclick=()=>navigator.clipboard?.writeText('Código: '+state.room+' | ID del líder: '+(state.hostId||state.peer?.id)).then(()=>alert('Código e ID del líder copiados')).catch(()=>alert('Código: '+state.room));
+function cleanup(){try{state.peer?.destroy()}catch{};state.peer=null;state.conn=null;state.conns={};state.players={};state.host=false;state.started=false;localStorage.removeItem('af_rejoin');setConn('Desconectado')}
+function offerReconnect(){const r=JSON.parse(localStorage.getItem('af_rejoin')||'null');if(r){state.reconnect=r;show('rejoin')}}
+$('noRejoin').onclick=()=>{hide('rejoin');localStorage.removeItem('af_rejoin');cleanup();showHome()};
+$('yesRejoin').onclick=()=>{hide('rejoin');const r=state.reconnect;if(!r)return;state.hostId=r.hostId;state.room=r.room;state.me=r.token;state.maxPlayers=Number($('format').value);joinRoom(r.room,r.token)};
+window.addEventListener('beforeunload',()=>{if(state.peer&&!state.host&&state.conn?.open)state.conn.send({type:'leave'})});
+})();
+</script>
+</body></html>
